@@ -231,13 +231,13 @@ async function buildConvertPath (file, target, queue) {
     ));
 
     if (simpleMode) {
-      // Check for *any* supported handler that outputs the target format
-      const match = allOptions.find(opt =>
+      // Try *all* supported handlers that output the target format
+      const candidates = allOptions.filter(opt =>
         validHandlers.includes(opt.handler) &&
         opt.format.mime === target.format.mime && opt.format.to
       );
-      if (match) {
-        const attempt = await attemptConvertPath(file, path.concat(match));
+      for (const candidate of candidates) {
+        const attempt = await attemptConvertPath(file, path.concat(candidate));
         if (attempt) return attempt;
       }
     } else {
