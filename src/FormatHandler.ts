@@ -1,4 +1,3 @@
-
 /**
  * Definition of file format. Contains format defined constants like mime type and names
  */
@@ -12,7 +11,7 @@ export interface IFormatDefinition {
   /** MIME type. */
   mime: string;
   /** Category for grouping formats. */
-  category?: Array<string> | string
+  category?: Array<string> | string;
 }
 
 export interface FileFormat extends IFormatDefinition {
@@ -38,17 +37,17 @@ export class FormatDefinition implements IFormatDefinition {
   public readonly category?: string[] | string;
 
   constructor(
-    name: string, 
-    format: string, 
-    extension: string, 
-    mime: string, 
-    category?: string[] | string
+    name: string,
+    format: string,
+    extension: string,
+    mime: string,
+    category?: string[] | string,
   ) {
-    this.name = name
-    this.format = format
-    this.extension = extension
-    this.mime = mime
-    this.category = category
+    this.name = name;
+    this.format = format;
+    this.extension = extension;
+    this.mime = mime;
+    this.category = category;
   }
 
   /**
@@ -59,21 +58,27 @@ export class FormatDefinition implements IFormatDefinition {
    * @param to Whether conversion **to** this format is supported.
    * @param lossless (Optional) Whether the format is lossless in this context. Defaults to `false`.
    * @param override Format definition values to override
-   * @returns 
+   * @returns
    */
-  supported(ref: string, from: boolean, to: boolean, lossless?: boolean, override: Partial<IFormatDefinition> = {}): FileFormat {
+  supported(
+    ref: string,
+    from: boolean,
+    to: boolean,
+    lossless?: boolean,
+    override: Partial<IFormatDefinition> = {},
+  ): FileFormat {
     return {
       ...this,
       ...override,
       internal: ref,
       from: from,
       to: to,
-      lossless: lossless ?? false
-    }
+      lossless: lossless ?? false,
+    };
   }
 
   /**
-   * Returns a builder to fluently create FileFormat.  
+   * Returns a builder to fluently create FileFormat.
    * Builder can be used to create FileFormat based on this format definition
    */
   builder(ref: string) {
@@ -123,8 +128,8 @@ export class FormatDefinition implements IFormatDefinition {
        * Replaces format category
        */
       withCategory(category: string[] | string | undefined) {
-        this.category = category
-        return this
+        this.category = category;
+        return this;
       },
       override(values: Partial<IFormatDefinition>) {
         Object.assign(this, values);
@@ -135,7 +140,6 @@ export class FormatDefinition implements IFormatDefinition {
     return builder as FileFormat & typeof builder;
   }
 }
-
 
 export interface FileData {
   /** File name with extension. */
@@ -188,7 +192,7 @@ export interface FormatHandler {
     inputFiles: FileData[],
     inputFormat: FileFormat,
     outputFormat: FileFormat,
-    args?: string[]
+    args?: string[],
   ) => Promise<FileData[]>;
 }
 

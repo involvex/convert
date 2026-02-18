@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: sans-serif;
-  --highlight-color: #1C77FF;
+  --highlight-color: #1c77ff;
 }
 
 #file-input {

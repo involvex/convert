@@ -7,26 +7,26 @@ import { Demo } from "./sppd/sppd/Demo.ts";
 import { Vector } from "./sppd/sppd/Vector.ts";
 import CommonFormats from "src/CommonFormats.ts";
 
-function toThreeVector (vec: Vector) {
+function toThreeVector(vec: Vector) {
   return new THREE.Vector3(vec.y, vec.z, vec.x);
 }
-function rotateFromSourceAngles (object: THREE.Object3D, angles: Vector) {
+function rotateFromSourceAngles(object: THREE.Object3D, angles: Vector) {
   const { forward, up } = angles.Scale(Math.PI / 180).FromAngles();
   object.up.copy(toThreeVector(up));
   object.lookAt(object.position.clone().add(toThreeVector(forward)));
 }
 
-function createFloorButton () {
+function createFloorButton() {
   const group = new THREE.Group();
 
   const buttonTop = new THREE.Mesh(
     new THREE.CylinderGeometry(36, 36, 4, 16),
-    new THREE.MeshLambertMaterial({ color: 0x550000 })
+    new THREE.MeshLambertMaterial({ color: 0x550000 }),
   );
   buttonTop.position.copy(toThreeVector(new Vector(0, 0, 12)));
   const buttonBottom = new THREE.Mesh(
     new THREE.CylinderGeometry(48, 48, 8, 16),
-    new THREE.MeshLambertMaterial({ color: 0x202020 })
+    new THREE.MeshLambertMaterial({ color: 0x202020 }),
   );
   buttonBottom.position.copy(toThreeVector(new Vector(0, 0, 4)));
 
@@ -36,17 +36,17 @@ function createFloorButton () {
   return group;
 }
 
-function createPedestalButton () {
+function createPedestalButton() {
   const group = new THREE.Group();
 
   const buttonTop = new THREE.Mesh(
     new THREE.CylinderGeometry(6, 6, 4, 8),
-    new THREE.MeshLambertMaterial({ color: 0x550000 })
+    new THREE.MeshLambertMaterial({ color: 0x550000 }),
   );
   buttonTop.position.copy(toThreeVector(new Vector(0, 0, 26)));
   const buttonBottom = new THREE.Mesh(
     new THREE.CylinderGeometry(8, 8, 52, 8),
-    new THREE.MeshLambertMaterial({ color: 0x424242 })
+    new THREE.MeshLambertMaterial({ color: 0x424242 }),
   );
 
   group.attach(buttonTop);
@@ -55,30 +55,30 @@ function createPedestalButton () {
   return group;
 }
 
-function createCube () {
+function createCube() {
   return new CSG.Brush(
     new THREE.BoxGeometry(36, 36, 36),
-    new THREE.MeshLambertMaterial({ color: 0x424242 })
+    new THREE.MeshLambertMaterial({ color: 0x424242 }),
   );
 }
 
-function createLaserCube () {
+function createLaserCube() {
   const group = new THREE.Group();
 
   const cubeBrush = new CSG.Brush(
     new THREE.BoxGeometry(36.5, 36.5, 36.5),
-    new THREE.MeshLambertMaterial({ color: 0x101010 })
+    new THREE.MeshLambertMaterial({ color: 0x101010 }),
   );
   const sphereBrush = new CSG.Brush(
     new THREE.SphereGeometry(22.6),
-    new THREE.MeshLambertMaterial({ color: 0x101010 })
+    new THREE.MeshLambertMaterial({ color: 0x101010 }),
   );
   const evaluator = new CSG.Evaluator();
   const cubeCase = evaluator.evaluate(cubeBrush, sphereBrush, CSG.SUBTRACTION);
 
   const cubeLens = new THREE.Mesh(
     new THREE.SphereGeometry(18),
-    new THREE.MeshLambertMaterial({ color: 0x00703e })
+    new THREE.MeshLambertMaterial({ color: 0x00703e }),
   );
 
   group.attach(cubeCase);
@@ -87,7 +87,7 @@ function createLaserCube () {
   return group;
 }
 
-function createPortal (blue = true) {
+function createPortal(blue = true) {
   const color = blue ? 0x0e8cff : 0xff8602;
 
   const portalGeometry = new THREE.CircleGeometry(32, 16);
@@ -96,22 +96,22 @@ function createPortal (blue = true) {
 
   const portal = new THREE.Mesh(
     portalGeometry,
-    new THREE.MeshBasicMaterial({ color })
+    new THREE.MeshBasicMaterial({ color }),
   );
 
   return portal;
 }
 
-function createLaserEmitter (centered = false) {
+function createLaserEmitter(centered = false) {
   const group = new THREE.Group();
 
   const emitterBase = new THREE.Mesh(
     new THREE.BoxGeometry(64, 64, 32),
-    new THREE.MeshLambertMaterial({ color: 0x151515 })
+    new THREE.MeshLambertMaterial({ color: 0x151515 }),
   );
   const emitterTip = new THREE.Mesh(
     new THREE.CylinderGeometry(14, 14, 2, 8),
-    new THREE.MeshLambertMaterial({ color: 0x242424 })
+    new THREE.MeshLambertMaterial({ color: 0x242424 }),
   );
   if (centered) {
     emitterTip.position.set(0, 0, 16);
@@ -126,22 +126,32 @@ function createLaserEmitter (centered = false) {
   return group;
 }
 
-function getModelBuilder (modelName: string) {
+function getModelBuilder(modelName: string) {
   switch (modelName) {
-    case "models/props/portal_button_damaged01.mdl": return createFloorButton;
-    case "models/props/portal_button_damaged02.mdl": return createFloorButton;
-    case "models/props/portal_button.mdl": return createFloorButton;
-    case "models/props/switch001.mdl": return createPedestalButton;
-    case "models/props/metal_box.mdl": return createCube;
-    case "models/props/reflection_cube.mdl": return createLaserCube;
-    case "models/portals/portal1.mdl": return () => createPortal(true);
-    case "models/portals/portal2.mdl": return () => createPortal(false);
-    case "models/props/laser_emitter.mdl": return createLaserEmitter;
-    case "models/props/laser_emitter_center.mdl": return () => createLaserEmitter(true);
+    case "models/props/portal_button_damaged01.mdl":
+      return createFloorButton;
+    case "models/props/portal_button_damaged02.mdl":
+      return createFloorButton;
+    case "models/props/portal_button.mdl":
+      return createFloorButton;
+    case "models/props/switch001.mdl":
+      return createPedestalButton;
+    case "models/props/metal_box.mdl":
+      return createCube;
+    case "models/props/reflection_cube.mdl":
+      return createLaserCube;
+    case "models/portals/portal1.mdl":
+      return () => createPortal(true);
+    case "models/portals/portal2.mdl":
+      return () => createPortal(false);
+    case "models/props/laser_emitter.mdl":
+      return createLaserEmitter;
+    case "models/props/laser_emitter_center.mdl":
+      return () => createLaserEmitter(true);
   }
 }
 
-function getJsonReplacer () {
+function getJsonReplacer() {
   const ancestors: object[] = [];
   return function (this: any, _key: string, value: any) {
     if (typeof value === "bigint") {
@@ -167,7 +177,7 @@ const VOXEL_SIZE_HALF = VOXEL_SIZE / 2;
 const propMaterial = new THREE.MeshLambertMaterial({
   color: 0xff00ff,
   opacity: 0.5,
-  transparent: true
+  transparent: true,
 });
 const brushMaterial = new THREE.MeshLambertMaterial({ color: 0x303030 });
 const wallGeometry = new THREE.PlaneGeometry(VOXEL_SIZE, VOXEL_SIZE);
@@ -175,7 +185,6 @@ const wallMaterial = new THREE.MeshLambertMaterial({ color: 0x242424 });
 const wallPortalMaterial = new THREE.MeshLambertMaterial({ color: 0x505050 });
 
 class sppdHandler implements FormatHandler {
-
   public name: string = "sppd";
   public supportedFormats: FileFormat[] = [
     {
@@ -185,11 +194,11 @@ class sppdHandler implements FormatHandler {
       mime: "application/x-portal2-demo",
       from: true,
       to: false,
-      internal: "dem"
+      internal: "dem",
     },
     CommonFormats.PNG.supported("png", false, true),
     CommonFormats.JPEG.supported("jpeg", false, true),
-    CommonFormats.JSON.supported("json", false, true, true)
+    CommonFormats.JSON.supported("json", false, true, true),
   ];
 
   public ready: boolean = false;
@@ -197,7 +206,12 @@ class sppdHandler implements FormatHandler {
   private renderBounds = { width: 640, height: 360 };
 
   private scene = new THREE.Scene();
-  private camera = new THREE.PerspectiveCamera(90, this.renderBounds.width / this.renderBounds.height, 0.1, 4096);
+  private camera = new THREE.PerspectiveCamera(
+    90,
+    this.renderBounds.width / this.renderBounds.height,
+    0.1,
+    4096,
+  );
   private renderer = new THREE.WebGLRenderer();
 
   private ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -209,35 +223,34 @@ class sppdHandler implements FormatHandler {
   private prevBluePortalPos: Vector | null = null;
   private prevOrangePortalPos: Vector | null = null;
 
-  resetSceneEntities () {
+  resetSceneEntities() {
     for (let i = 0; i < 2048; i++) {
       if (this.entityObjects[i]?.renderable) {
         this.scene.remove(this.entityObjects[i].renderable);
       }
       this.entityObjects[i] = {
         entity: null,
-        renderable: null
+        renderable: null,
       };
     }
   }
-  resetSceneWalls () {
+  resetSceneWalls() {
     for (let i = 0; i < this.wallObjects.length; i++) {
       this.scene.remove(this.wallObjects[i]);
     }
     this.wallObjects.length = 0;
   }
 
-
-  addVoxelPoint (point: Vector, voxels: Map<string, Vector>) {
+  addVoxelPoint(point: Vector, voxels: Map<string, Vector>) {
     const voxelPosition = point
       .Sub(this.voxelGridOffset || new Vector())
-      .map(c => Math.floor(c / VOXEL_SIZE));
+      .map((c) => Math.floor(c / VOXEL_SIZE));
     const voxelKey = `${voxelPosition.x};${voxelPosition.y};${voxelPosition.z}`;
     if (voxels.has(voxelKey)) return;
     voxels.set(voxelKey, voxelPosition);
   }
 
-  addVoxelsAlongRay (start: Vector, end: Vector, voxels: Map<string, Vector>) {
+  addVoxelsAlongRay(start: Vector, end: Vector, voxels: Map<string, Vector>) {
     const gx0 = (start.x - (this.voxelGridOffset?.x || 0)) / VOXEL_SIZE;
     const gy0 = (start.y - (this.voxelGridOffset?.y || 0)) / VOXEL_SIZE;
     const gz0 = (start.z - (this.voxelGridOffset?.z || 0)) / VOXEL_SIZE;
@@ -258,9 +271,21 @@ class sppdHandler implements FormatHandler {
     const tDeltaY = stepY !== 0 ? Math.abs(1 / dy) : Infinity;
     const tDeltaZ = stepZ !== 0 ? Math.abs(1 / dz) : Infinity;
 
-    let tMaxX = stepX !== 0 ? (stepX > 0 ? (Math.floor(gx0) + 1 - gx0) : (gx0 - Math.floor(gx0))) * tDeltaX : Infinity;
-    let tMaxY = stepY !== 0 ? (stepY > 0 ? (Math.floor(gy0) + 1 - gy0) : (gy0 - Math.floor(gy0))) * tDeltaY : Infinity;
-    let tMaxZ = stepZ !== 0 ? (stepZ > 0 ? (Math.floor(gz0) + 1 - gz0) : (gz0 - Math.floor(gz0))) * tDeltaZ : Infinity;
+    let tMaxX =
+      stepX !== 0
+        ? (stepX > 0 ? Math.floor(gx0) + 1 - gx0 : gx0 - Math.floor(gx0)) *
+          tDeltaX
+        : Infinity;
+    let tMaxY =
+      stepY !== 0
+        ? (stepY > 0 ? Math.floor(gy0) + 1 - gy0 : gy0 - Math.floor(gy0)) *
+          tDeltaY
+        : Infinity;
+    let tMaxZ =
+      stepZ !== 0
+        ? (stepZ > 0 ? Math.floor(gz0) + 1 - gz0 : gz0 - Math.floor(gz0)) *
+          tDeltaZ
+        : Infinity;
 
     let x = Math.floor(gx0);
     let y = Math.floor(gy0);
@@ -297,7 +322,11 @@ class sppdHandler implements FormatHandler {
     }
   }
 
-  collectPoints (demo: Demo, voxels: Map<string, Vector>, portalVoxels: Map<string, Vector>) {
+  collectPoints(
+    demo: Demo,
+    voxels: Map<string, Vector>,
+    portalVoxels: Map<string, Vector>,
+  ) {
     const { entities } = demo.state;
     if (!entities) return;
 
@@ -310,7 +339,7 @@ class sppdHandler implements FormatHandler {
         const doorForward = door.GetForwardVector();
         this.voxelGridOffset = doorPosition
           .Add(doorForward.Scale(-16))
-          .map(c => c % 64);
+          .map((c) => c % 64);
       }
     }
 
@@ -327,18 +356,26 @@ class sppdHandler implements FormatHandler {
       if (classname === "weapon_portalgun" && entity.GetOwner()) {
         const lastPortal = entity.GetProperty("m_iLastFiredPortal");
         if (lastPortal === 0) continue;
-        const viewOrigin = demo.state.players[0].viewOrigin.Add(new Vector(0, 0, 56));
+        const viewOrigin = demo.state.players[0].viewOrigin.Add(
+          new Vector(0, 0, 56),
+        );
         if (lastPortal === 1) {
           const bluePortalPos = entity.GetProperty("m_vecBluePortalPos");
           if (!(bluePortalPos instanceof Vector)) continue;
-          if (!this.prevBluePortalPos || bluePortalPos.Sub(this.prevBluePortalPos).LengthSqr() > 1e-6) {
+          if (
+            !this.prevBluePortalPos ||
+            bluePortalPos.Sub(this.prevBluePortalPos).LengthSqr() > 1e-6
+          ) {
             this.prevBluePortalPos = bluePortalPos;
             this.addVoxelsAlongRay(viewOrigin, bluePortalPos, voxels);
           }
         } else {
           const orangePortalPos = entity.GetProperty("m_vecOrangePortalPos");
           if (!(orangePortalPos instanceof Vector)) continue;
-          if (!this.prevOrangePortalPos || orangePortalPos.Sub(this.prevOrangePortalPos).LengthSqr() > 1e-6) {
+          if (
+            !this.prevOrangePortalPos ||
+            orangePortalPos.Sub(this.prevOrangePortalPos).LengthSqr() > 1e-6
+          ) {
             this.prevOrangePortalPos = orangePortalPos;
             this.addVoxelsAlongRay(viewOrigin, orangePortalPos, voxels);
           }
@@ -381,14 +418,14 @@ class sppdHandler implements FormatHandler {
     }
   }
 
-  buildWalls (voxels: Map<string, Vector>, portalVoxels: Map<string, Vector>) {
+  buildWalls(voxels: Map<string, Vector>, portalVoxels: Map<string, Vector>) {
     const directions = [
       new Vector(1, 0, 0),
       new Vector(-1, 0, 0),
       new Vector(0, 1, 0),
       new Vector(0, -1, 0),
       new Vector(0, 0, 1),
-      new Vector(0, 0, -1)
+      new Vector(0, 0, -1),
     ];
 
     for (const [key, _position] of portalVoxels) {
@@ -408,10 +445,12 @@ class sppdHandler implements FormatHandler {
           .Add(directions[i].Scale(VOXEL_SIZE_HALF))
           .Add(new Vector(VOXEL_SIZE_HALF, VOXEL_SIZE_HALF, VOXEL_SIZE_HALF))
           .Add(this.voxelGridOffset || new Vector());
-        const meshFacing = meshCenterPosition
-          .Sub(directions[i]);
+        const meshFacing = meshCenterPosition.Sub(directions[i]);
 
-        const wallMesh = new THREE.Mesh(wallGeometry, isPortalable ? wallPortalMaterial : wallMaterial);
+        const wallMesh = new THREE.Mesh(
+          wallGeometry,
+          isPortalable ? wallPortalMaterial : wallMaterial,
+        );
         wallMesh.position.copy(toThreeVector(meshCenterPosition));
         wallMesh.lookAt(toThreeVector(meshFacing));
 
@@ -421,18 +460,18 @@ class sppdHandler implements FormatHandler {
     }
   }
 
-
-  async playbackTickHandler (demo: Demo) {
-
+  async playbackTickHandler(demo: Demo) {
     const { entities } = demo.state;
     if (!entities) return;
 
     const { viewOrigin, viewAngles } = demo.state.players[0];
-    this.camera.position.copy(toThreeVector(viewOrigin.Add(new Vector(0, 0, 56))));
+    this.camera.position.copy(
+      toThreeVector(viewOrigin.Add(new Vector(0, 0, 56))),
+    );
     rotateFromSourceAngles(this.camera, viewAngles);
     this.pointLight.position.copy(this.camera.position);
 
-    for (let i = 2; i < entities.length; i ++) {
+    for (let i = 2; i < entities.length; i++) {
       const object = this.entityObjects[i];
       const entity = entities[i];
 
@@ -458,7 +497,6 @@ class sppdHandler implements FormatHandler {
 
       // Mesh being drawn does not correspond to this entity
       if (object.entity !== entity) {
-
         const modelBuilder = getModelBuilder(model);
         if (modelBuilder) {
           if (classname === "phys_bone_follower") {
@@ -475,7 +513,10 @@ class sppdHandler implements FormatHandler {
           const geometry = new THREE.BoxGeometry(size.y, size.z, size.x);
           const offset = toThreeVector(center.Sub(pos));
           geometry.translate(offset.x, offset.y, offset.z);
-          object.renderable = new THREE.Mesh(geometry, isBrush ? brushMaterial : propMaterial);
+          object.renderable = new THREE.Mesh(
+            geometry,
+            isBrush ? brushMaterial : propMaterial,
+          );
 
           if (object.renderable) {
             this.scene.remove(object.renderable);
@@ -488,13 +529,10 @@ class sppdHandler implements FormatHandler {
 
       object.renderable.position.copy(toThreeVector(pos));
       rotateFromSourceAngles(object.renderable, ang);
-
     }
-
   }
 
-  async init () {
-
+  async init() {
     this.renderer.setSize(this.renderBounds.width, this.renderBounds.height);
     this.scene.add(this.ambientLight);
     this.scene.add(this.pointLight);
@@ -502,10 +540,10 @@ class sppdHandler implements FormatHandler {
     this.ready = true;
   }
 
-  async doConvert (
+  async doConvert(
     inputFiles: FileData[],
     inputFormat: FileFormat,
-    outputFormat: FileFormat
+    outputFormat: FileFormat,
   ): Promise<FileData[]> {
     const outputFiles: FileData[] = [];
 
@@ -515,7 +553,6 @@ class sppdHandler implements FormatHandler {
     let frameIndex = 0;
 
     for (const inputFile of inputFiles) {
-
       const voxels: Map<string, Vector> = new Map();
       const portalVoxels: Map<string, Vector> = new Map();
 
@@ -524,10 +561,10 @@ class sppdHandler implements FormatHandler {
         this.voxelGridOffset = null;
       }
 
-      const demo: Demo = await new Promise(resolve => {
+      const demo: Demo = await new Promise((resolve) => {
         new Demo(inputFile.bytes, {
           onTick: (demo) => this.collectPoints(demo, voxels, portalVoxels),
-          onFinish: resolve
+          onFinish: resolve,
         });
       });
 
@@ -543,7 +580,7 @@ class sppdHandler implements FormatHandler {
       this.buildWalls(voxels, portalVoxels);
       this.resetSceneEntities();
 
-      await new Promise(resolve => {
+      await new Promise((resolve) => {
         new Demo(inputFile.bytes, {
           onTick: async (demo: Demo) => {
             await this.playbackTickHandler(demo);
@@ -552,23 +589,26 @@ class sppdHandler implements FormatHandler {
             const bytes: Uint8Array = await new Promise((resolve, reject) => {
               this.renderer.domElement.toBlob((blob) => {
                 if (!blob) return reject("Canvas output failed");
-                blob.arrayBuffer().then(buf => resolve(new Uint8Array(buf)));
+                blob.arrayBuffer().then((buf) => resolve(new Uint8Array(buf)));
               }, outputFormat.mime);
             });
-            const name = inputFile.name.split(".")[0] + "_" + frameIndex + "." + outputFormat.extension;
+            const name =
+              inputFile.name.split(".")[0] +
+              "_" +
+              frameIndex +
+              "." +
+              outputFormat.extension;
             outputFiles.push({ bytes, name });
 
-            frameIndex ++;
+            frameIndex++;
           },
-          onFinish: resolve
+          onFinish: resolve,
         });
       });
-
     }
 
     return outputFiles;
   }
-
 }
 
 export default sppdHandler;

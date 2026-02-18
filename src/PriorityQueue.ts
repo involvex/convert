@@ -7,7 +7,7 @@ class PriorityQueue<T extends Object> {
     const cap = initialCapacity ?? 11;
     const com = comparator ?? null;
     if (cap < 1) {
-      throw new Error('initial capacity must be greater than or equal to 1');
+      throw new Error("initial capacity must be greater than or equal to 1");
     }
     this._queue = new Array<T>(cap);
     this._comparator = com;
@@ -19,7 +19,7 @@ class PriorityQueue<T extends Object> {
     const newCapacity =
       oldCapacity + (oldCapacity < 64 ? oldCapacity + 2 : oldCapacity >> 1);
     if (!Number.isSafeInteger(newCapacity)) {
-      throw new Error('capacity out of range');
+      throw new Error("capacity out of range");
     }
     this._queue.length = newCapacity;
   }
@@ -179,7 +179,7 @@ class PriorityQueue<T extends Object> {
   }
 
   public toArray(): Array<T> {
-    return this._queue.filter(item => item);
+    return this._queue.filter((item) => item);
   }
 
   public toString(): string {
@@ -192,9 +192,9 @@ class PriorityQueue<T extends Object> {
       next: () => {
         return {
           done: i == this._size,
-          value: <T>this._queue[i++]
+          value: <T>this._queue[i++],
         };
-      }
+      },
     };
   }
 }

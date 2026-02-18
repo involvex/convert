@@ -1,10 +1,9 @@
-import { imageTracer } from 'imagetracer'
+import { imageTracer } from "imagetracer";
 
 import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
-import CommonFormats from 'src/CommonFormats.ts';
+import CommonFormats from "src/CommonFormats.ts";
 
 class svgTraceHandler implements FormatHandler {
-
   public name: string = "svgTrace";
   public supportedFormats?: FileFormat[];
   public ready: boolean = false;
@@ -15,7 +14,7 @@ class svgTraceHandler implements FormatHandler {
       CommonFormats.JPEG.builder("jpeg").allowFrom(),
       // note there is both animated svgs, and animted webPs, although this converter does not support either
       CommonFormats.WEBP.builder("webp").allowFrom(),
-      CommonFormats.SVG.builder("svg").allowTo()
+      CommonFormats.SVG.builder("svg").allowTo(),
     ];
     this.ready = true;
   }
@@ -23,7 +22,7 @@ class svgTraceHandler implements FormatHandler {
   async doConvert(
     inputFiles: FileData[],
     inputFormat: FileFormat,
-    outputFormat: FileFormat
+    outputFormat: FileFormat,
   ): Promise<FileData[]> {
     if (outputFormat.internal !== "svg") throw "Invalid output format.";
 
@@ -31,18 +30,18 @@ class svgTraceHandler implements FormatHandler {
     const encoder = new TextEncoder();
 
     for (const inputFile of inputFiles) {
-      const blob = new Blob([inputFile.bytes as BlobPart], { type: inputFormat.mime });
-      const url = URL.createObjectURL(blob)
-      const traced = await imageTracer.imageToSVG(url) // return the full svg string
-      const name = inputFile.name.split(".")[0] + ".svg"
+      const blob = new Blob([inputFile.bytes as BlobPart], {
+        type: inputFormat.mime,
+      });
+      const url = URL.createObjectURL(blob);
+      const traced = await imageTracer.imageToSVG(url); // return the full svg string
+      const name = inputFile.name.split(".")[0] + ".svg";
       const bytes = encoder.encode(traced);
-
 
       outputFiles.push({ bytes, name });
     }
     return outputFiles;
   }
-
 }
 
 export default svgTraceHandler;

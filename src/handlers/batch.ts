@@ -18,36 +18,47 @@ class batchHandler implements FormatHandler {
     inputFormat: FileFormat,
     outputFormat: FileFormat,
   ): Promise<FileData[]> {
-    
     const outputFiles: FileData[] = [];
 
     for (const file of inputFiles) {
-      
       const dec = new TextDecoder().decode(file.bytes);
       let out = "";
 
       if (inputFormat.internal === "txt" && outputFormat.internal === "bat") {
-
         const lines = dec.split(/\r?\n/);
 
         const escapeBat = (line: string) => {
           const buf: string[] = [];
           for (const ch of line) {
             switch (ch) {
-              case "%": buf.push("%%"); break;
-              case "^": buf.push("^^"); break;
-              case "&": buf.push("^&"); break;
-              case "|": buf.push("^|"); break;
-              case "<": buf.push("^<"); break;
-              case ">": buf.push("^>"); break;
-              case "!": buf.push("^^!"); break;
-              default:  buf.push(ch);
+              case "%":
+                buf.push("%%");
+                break;
+              case "^":
+                buf.push("^^");
+                break;
+              case "&":
+                buf.push("^&");
+                break;
+              case "|":
+                buf.push("^|");
+                break;
+              case "<":
+                buf.push("^<");
+                break;
+              case ">":
+                buf.push("^>");
+                break;
+              case "!":
+                buf.push("^^!");
+                break;
+              default:
+                buf.push(ch);
             }
           }
           // This avoids repeated string reallocation.
           return buf.join("");
         };
-
 
         out = "@echo off\r\n";
 
@@ -59,8 +70,7 @@ class batchHandler implements FormatHandler {
           }
         }
         // Add a pause at the end to keep the window open
-        out += "pause\r\n"; 
-
+        out += "pause\r\n";
       } else {
         throw new Error("Invalid output format.");
       }

@@ -7,7 +7,6 @@ import parseXLSX from "./envelope/parseXLSX.js";
 import CommonFormats from "src/CommonFormats.ts";
 
 class envelopeHandler implements FormatHandler {
-
   public name: string = "envelope";
 
   public supportedFormats: FileFormat[] = [
@@ -22,7 +21,7 @@ class envelopeHandler implements FormatHandler {
       from: true,
       to: false,
       internal: "odt",
-      category: "document"
+      category: "document",
     },
     {
       name: "OpenDocument Presentation",
@@ -32,7 +31,7 @@ class envelopeHandler implements FormatHandler {
       from: true,
       to: false,
       internal: "odp",
-      category: "presentation"
+      category: "presentation",
     },
     {
       name: "OpenDocument Spreadsheet",
@@ -42,35 +41,47 @@ class envelopeHandler implements FormatHandler {
       from: true,
       to: false,
       internal: "ods",
-      category: "spreadsheet"
+      category: "spreadsheet",
     },
     // Technically not "lossless", but it's about as close as we'll ever get
-    CommonFormats.HTML.supported("html", false, true, true)
+    CommonFormats.HTML.supported("html", false, true, true),
   ];
 
   public ready: boolean = true;
 
-  async init () {
+  async init() {
     this.ready = true;
   }
 
-  async doConvert (
+  async doConvert(
     inputFiles: FileData[],
     inputFormat: FileFormat,
-    outputFormat: FileFormat
+    outputFormat: FileFormat,
   ): Promise<FileData[]> {
-
     if (outputFormat.internal !== "html") throw "Invalid output format.";
 
     let parser: (bytes: Uint8Array) => Promise<string>;
     switch (inputFormat.internal) {
-      case "odt": parser = parseODT; break;
-      case "odp": parser = parseODP; break;
-      case "ods": parser = parseODS; break;
-      case "docx": parser = parseDOCX; break;
-      case "pptx": parser = parsePPTX; break;
-      case "xlsx": parser = parseXLSX; break;
-      default: throw "Invalid input format.";
+      case "odt":
+        parser = parseODT;
+        break;
+      case "odp":
+        parser = parseODP;
+        break;
+      case "ods":
+        parser = parseODS;
+        break;
+      case "docx":
+        parser = parseDOCX;
+        break;
+      case "pptx":
+        parser = parsePPTX;
+        break;
+      case "xlsx":
+        parser = parseXLSX;
+        break;
+      default:
+        throw "Invalid input format.";
     }
 
     const outputFiles: FileData[] = [];
@@ -88,9 +99,7 @@ class envelopeHandler implements FormatHandler {
     }
 
     return outputFiles;
-
   }
-
 }
 
 export default envelopeHandler;

@@ -1,4 +1,9 @@
-import type { FileFormat, FileData, FormatHandler, ConvertPathNode } from "./FormatHandler.js";
+import type {
+  FileFormat,
+  FileData,
+  FormatHandler,
+  ConvertPathNode,
+} from "./FormatHandler.js";
 import normalizeMimeType from "./normalizeMimeType.js";
 import handlers from "./handlers";
 import { TraversionGraph } from "./TraversionGraph.js";
@@ -15,10 +20,12 @@ let simpleMode: boolean = true;
 
 /** Handlers that support conversion from any formats. */
 const conversionsFromAnyInput: ConvertPathNode[] = handlers
-.filter(h => h.supportAnyInput && h.supportedFormats)
-.flatMap(h => h.supportedFormats!
-  .filter(f => f.to)
-  .map(f => ({ handler: h, format: f})))
+  .filter((h) => h.supportAnyInput && h.supportedFormats)
+  .flatMap((h) =>
+    h
+      .supportedFormats!.filter((f) => f.to)
+      .map((f) => ({ handler: h, format: f })),
+  );
 
 const ui = {
   fileInput: document.querySelector("#file-input") as HTMLInputElement,
@@ -30,7 +37,7 @@ const ui = {
   inputSearch: document.querySelector("#search-from") as HTMLInputElement,
   outputSearch: document.querySelector("#search-to") as HTMLInputElement,
   popupBox: document.querySelector("#popup") as HTMLDivElement,
-  popupBackground: document.querySelector("#popup-bg") as HTMLDivElement
+  popupBackground: document.querySelector("#popup-bg") as HTMLDivElement,
 };
 
 /**
@@ -54,7 +61,7 @@ const filterButtonList = (list: HTMLDivElement, string: string) => {
       button.style.display = "";
     }
   }
-}
+};
 
 /**
  * Handles search box input by filtering its parent container.
@@ -87,7 +94,6 @@ ui.fileSelectArea.onclick = () => {
  * or a "drop" event.
  */
 const fileSelectHandler = (event: Event) => {
-
   let inputFiles;
 
   if (event instanceof DragEvent) {
@@ -105,10 +111,10 @@ const fileSelectHandler = (event: Event) => {
   const files = Array.from(inputFiles);
   if (files.length === 0) return;
 
-  if (files.some(c => c.type !== files[0].type)) {
+  if (files.some((c) => c.type !== files[0].type)) {
     return alert("All input files must be of the same type.");
   }
-  files.sort((a, b) => a.name === b.name ? 0 : (a.name < b.name ? -1 : 1));
+  files.sort((a, b) => (a.name === b.name ? 0 : a.name < b.name ? -1 : 1));
   selectedFiles = files;
 
   ui.fileSelectArea.innerHTML = `<h2>
@@ -120,7 +126,7 @@ const fileSelectHandler = (event: Event) => {
   let mimeType = normalizeMimeType(files[0].type);
 
   // Find a button matching the input MIME type.
-  const buttonMimeType = Array.from(ui.inputList.children).find(button => {
+  const buttonMimeType = Array.from(ui.inputList.children).find((button) => {
     if (!(button instanceof HTMLButtonElement)) return false;
     return button.getAttribute("mime-type") === mimeType;
   });
@@ -135,7 +141,7 @@ const fileSelectHandler = (event: Event) => {
   // Fall back to matching format by file extension if MIME type wasn't found.
   const fileExtension = files[0].name.split(".").pop()?.toLowerCase();
 
-  const buttonExtension = Array.from(ui.inputList.children).find(button => {
+  const buttonExtension = Array.from(ui.inputList.children).find((button) => {
     if (!(button instanceof HTMLButtonElement)) return false;
     const formatIndex = button.getAttribute("format-index");
     if (!formatIndex) return;
@@ -150,14 +156,13 @@ const fileSelectHandler = (event: Event) => {
   }
 
   filterButtonList(ui.inputList, ui.inputSearch.value);
-
 };
 
 // Add the file selection handler to both the file input element and to
 // the window as a drag-and-drop event, and to the clipboard paste event.
 ui.fileInput.addEventListener("change", fileSelectHandler);
 window.addEventListener("drop", fileSelectHandler);
-window.addEventListener("dragover", e => e.preventDefault());
+window.addEventListener("dragover", (e) => e.preventDefault());
 window.addEventListener("paste", fileSelectHandler);
 
 /**
@@ -168,16 +173,16 @@ window.showPopup = function (html: string) {
   ui.popupBox.innerHTML = html;
   ui.popupBox.style.display = "block";
   ui.popupBackground.style.display = "block";
-}
+};
 /**
  * Hide the on-screen popup.
  */
 window.hidePopup = function () {
   ui.popupBox.style.display = "none";
   ui.popupBackground.style.display = "none";
-}
+};
 
-const allOptions: Array<{ format: FileFormat, handler: FormatHandler }> = [];
+const allOptions: Array<{ format: FileFormat; handler: FormatHandler }> = [];
 
 window.supportedFormatCache = new Map();
 window.traversionGraph = new TraversionGraph();
@@ -188,11 +193,9 @@ window.printSupportedFormatCache = () => {
     entries.push(entry);
   }
   return JSON.stringify(entries, null, 2);
-}
+};
 
-
-async function buildOptionList () {
-
+async function buildOptionList() {
   allOptions.length = 0;
   ui.inputList.innerHTML = "";
   ui.outputList.innerHTML = "";
@@ -202,7 +205,9 @@ async function buildOptionList () {
       console.warn(`Cache miss for formats of handler "${handler.name}".`);
       try {
         await handler.init();
-      } catch (_) { continue; }
+      } catch (_) {
+        continue;
+      }
       if (handler.supportedFormats) {
         window.supportedFormatCache.set(handler.name, handler.supportedFormats);
         console.info(`Updated supported format cache for "${handler.name}".`);
@@ -214,40 +219,62 @@ async function buildOptionList () {
       continue;
     }
     for (const format of supportedFormats) {
-
       if (!format.mime) continue;
 
       allOptions.push({ format, handler });
 
       // In simple mode, display each input/output format only once
-      let addToInputs = true, addToOutputs = true;
+      let addToInputs = true,
+        addToOutputs = true;
       if (simpleMode) {
-        addToInputs = !Array.from(ui.inputList.children).some(c => {
-          const currFormat = allOptions[parseInt(c.getAttribute("format-index") || "")]?.format;
-          return currFormat?.mime === format.mime && currFormat?.format === format.format;
+        addToInputs = !Array.from(ui.inputList.children).some((c) => {
+          const currFormat =
+            allOptions[parseInt(c.getAttribute("format-index") || "")]?.format;
+          return (
+            currFormat?.mime === format.mime &&
+            currFormat?.format === format.format
+          );
         });
-        addToOutputs = !Array.from(ui.outputList.children).some(c => {
-          const currFormat = allOptions[parseInt(c.getAttribute("format-index") || "")]?.format;
-          return currFormat?.mime === format.mime && currFormat?.format === format.format;
+        addToOutputs = !Array.from(ui.outputList.children).some((c) => {
+          const currFormat =
+            allOptions[parseInt(c.getAttribute("format-index") || "")]?.format;
+          return (
+            currFormat?.mime === format.mime &&
+            currFormat?.format === format.format
+          );
         });
-        if ((!format.from || !addToInputs) && (!format.to || !addToOutputs)) continue;
+        if ((!format.from || !addToInputs) && (!format.to || !addToOutputs))
+          continue;
       }
 
       const newOption = document.createElement("button");
-      newOption.setAttribute("format-index", (allOptions.length - 1).toString());
+      newOption.setAttribute(
+        "format-index",
+        (allOptions.length - 1).toString(),
+      );
       newOption.setAttribute("mime-type", format.mime);
 
       const formatDescriptor = format.format.toUpperCase();
       if (simpleMode) {
         // Hide any handler-specific information in simple mode
         const cleanName = format.name
-          .split("(").join(")").split(")")
+          .split("(")
+          .join(")")
+          .split(")")
           .filter((_, i) => i % 2 === 0)
-          .filter(c => c != "")
+          .filter((c) => c != "")
           .join(" ");
-        newOption.appendChild(document.createTextNode(`${formatDescriptor} - ${cleanName} (${format.mime})`));
+        newOption.appendChild(
+          document.createTextNode(
+            `${formatDescriptor} - ${cleanName} (${format.mime})`,
+          ),
+        );
       } else {
-        newOption.appendChild(document.createTextNode(`${formatDescriptor} - ${format.name} (${format.mime}) ${handler.name}`));
+        newOption.appendChild(
+          document.createTextNode(
+            `${formatDescriptor} - ${format.name} (${format.mime}) ${handler.name}`,
+          ),
+        );
       }
 
       const clickHandler = (event: Event) => {
@@ -274,7 +301,6 @@ async function buildOptionList () {
         clone.onclick = clickHandler;
         ui.outputList.appendChild(clone);
       }
-
     }
   }
   window.traversionGraph.init();
@@ -282,17 +308,16 @@ async function buildOptionList () {
   filterButtonList(ui.outputList, ui.outputSearch.value);
 
   window.hidePopup();
-
 }
 
 (async () => {
   try {
-    const cacheJSON = await fetch("cache.json").then(r => r.json());
+    const cacheJSON = await fetch("cache.json").then((r) => r.json());
     window.supportedFormatCache = new Map(cacheJSON);
   } catch {
     console.warn(
       "Missing supported format precache.\n\n" +
-      "Consider saving the output of printSupportedFormatCache() to cache.json."
+        "Consider saving the output of printSupportedFormatCache() to cache.json.",
     );
   } finally {
     await buildOptionList();
@@ -312,52 +337,72 @@ ui.modeToggleButton.addEventListener("click", () => {
   buildOptionList();
 });
 
-async function attemptConvertPath (files: FileData[], path: ConvertPathNode[]) {
-
+async function attemptConvertPath(files: FileData[], path: ConvertPathNode[]) {
   ui.popupBox.innerHTML = `<h2>Finding conversion route...</h2>
-    <p>Trying <b>${path.map(c => c.format.format).join(" → ")}</b>...</p>`;
+    <p>Trying <b>${path.map((c) => c.format.format).join(" → ")}</b>...</p>`;
 
-  for (let i = 0; i < path.length - 1; i ++) {
+  for (let i = 0; i < path.length - 1; i++) {
     const handler = path[i + 1].handler;
     try {
       let supportedFormats = window.supportedFormatCache.get(handler.name);
       if (!handler.ready) {
         try {
           await handler.init();
-        } catch (_) { return null; }
+        } catch (_) {
+          return null;
+        }
         if (handler.supportedFormats) {
-          window.supportedFormatCache.set(handler.name, handler.supportedFormats);
+          window.supportedFormatCache.set(
+            handler.name,
+            handler.supportedFormats,
+          );
           supportedFormats = handler.supportedFormats;
         }
       }
-      if (!supportedFormats) throw `Handler "${handler.name}" doesn't support any formats.`;
-      const inputFormat = supportedFormats.find(c => c.mime === path[i].format.mime && c.from)!;
-      files = (await Promise.all([
-        handler.doConvert(files, inputFormat, path[i + 1].format),
-        // Ensure that we wait long enough for the UI to update
-        new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      ]))[0];
-      if (files.some(c => !c.bytes.length)) throw "Output is empty.";
+      if (!supportedFormats)
+        throw `Handler "${handler.name}" doesn't support any formats.`;
+      const inputFormat = supportedFormats.find(
+        (c) => c.mime === path[i].format.mime && c.from,
+      )!;
+      files = (
+        await Promise.all([
+          handler.doConvert(files, inputFormat, path[i + 1].format),
+          // Ensure that we wait long enough for the UI to update
+          new Promise((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(resolve)),
+          ),
+        ])
+      )[0];
+      if (files.some((c) => !c.bytes.length)) throw "Output is empty.";
     } catch (e) {
-      console.log(path.map(c => c.format.format));
-      console.error(handler.name, `${path[i].format.format} → ${path[i + 1].format.format}`, e);
+      console.log(path.map((c) => c.format.format));
+      console.error(
+        handler.name,
+        `${path[i].format.format} → ${path[i + 1].format.format}`,
+        e,
+      );
       ui.popupBox.innerHTML = `<h2>Finding conversion route...</h2>
         <p>Looking for a valid path...</p>`;
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      );
       return null;
     }
   }
 
   return { files, path };
-
 }
 
-async function tryConvertByTraversing (
+async function tryConvertByTraversing(
   files: FileData[],
   from: ConvertPathNode,
-  to: ConvertPathNode
+  to: ConvertPathNode,
 ) {
-  for await (const path of window.traversionGraph.searchPath(from, to, simpleMode)) {
+  for await (const path of window.traversionGraph.searchPath(
+    from,
+    to,
+    simpleMode,
+  )) {
     // Use exact output format if the target handler supports it
     if (path.at(-1)?.handler === to.handler) {
       path[path.length - 1] = to;
@@ -368,7 +413,7 @@ async function tryConvertByTraversing (
   return null;
 }
 
-function downloadFile (bytes: Uint8Array, name: string, mime: string) {
+function downloadFile(bytes: Uint8Array, name: string, mime: string) {
   const blob = new Blob([bytes as BlobPart], { type: mime });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -377,7 +422,6 @@ function downloadFile (bytes: Uint8Array, name: string, mime: string) {
 }
 
 ui.convertButton.onclick = async function () {
-
   const inputFiles = selectedFiles;
 
   if (inputFiles.length === 0) {
@@ -390,14 +434,15 @@ ui.convertButton.onclick = async function () {
   const outputButton = document.querySelector("#to-list .selected");
   if (!outputButton) return alert("Specify output file format.");
 
-  const inputOption = allOptions[Number(inputButton.getAttribute("format-index"))];
-  const outputOption = allOptions[Number(outputButton.getAttribute("format-index"))];
+  const inputOption =
+    allOptions[Number(inputButton.getAttribute("format-index"))];
+  const outputOption =
+    allOptions[Number(outputButton.getAttribute("format-index"))];
 
   const inputFormat = inputOption.format;
   const outputFormat = outputOption.format;
 
   try {
-
     const inputFileData = [];
     for (const inputFile of inputFiles) {
       const inputBuffer = await inputFile.arrayBuffer();
@@ -411,9 +456,15 @@ ui.convertButton.onclick = async function () {
 
     window.showPopup("<h2>Finding conversion route...</h2>");
     // Delay for a bit to give the browser time to render
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await new Promise((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve)),
+    );
 
-    const output = await tryConvertByTraversing(inputFileData, inputOption, outputOption);
+    const output = await tryConvertByTraversing(
+      inputFileData,
+      inputOption,
+      outputOption,
+    );
     if (!output) {
       window.hidePopup();
       alert("Failed to find conversion route.");
@@ -426,16 +477,12 @@ ui.convertButton.onclick = async function () {
 
     window.showPopup(
       `<h2>Converted ${inputOption.format.format} to ${outputOption.format.format}!</h2>` +
-      `<p>Path used: <b>${output.path.map(c => c.format.format).join(" → ")}</b>.</p>\n` +
-      `<button onclick="window.hidePopup()">OK</button>`
+        `<p>Path used: <b>${output.path.map((c) => c.format.format).join(" → ")}</b>.</p>\n` +
+        `<button onclick="window.hidePopup()">OK</button>`,
     );
-
   } catch (e) {
-
     window.hidePopup();
     alert("Unexpected error while routing:\n" + e);
     console.error(e);
-
   }
-
 };

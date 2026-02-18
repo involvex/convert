@@ -26,7 +26,10 @@ export class LZHEncoder {
     this.output.push(new Uint8Array([0x00]));
 
     // Concatenate all chunks
-    const totalLength = this.output.reduce((sum, chunk) => sum + chunk.length, 0);
+    const totalLength = this.output.reduce(
+      (sum, chunk) => sum + chunk.length,
+      0,
+    );
     const result = new Uint8Array(totalLength);
     let offset = 0;
     for (const chunk of this.output) {
@@ -50,9 +53,10 @@ export class LZHEncoder {
     const filenameLength = Math.min(filenameBytes.length, 255);
 
     // Calculate header size (level 0)
-    // 2 (header size + checksum) + 5 (method) + 4 (comp size) + 4 (orig size) + 
+    // 2 (header size + checksum) + 5 (method) + 4 (comp size) + 4 (orig size) +
     // 2 (time) + 2 (date) + 1 (attr) + 1 (level) + 1 (name len) + name + 2 (crc)
-    const baseHeaderSize = 2 + 5 + 4 + 4 + 2 + 2 + 1 + 1 + 1 + filenameLength + 2;
+    const baseHeaderSize =
+      2 + 5 + 4 + 4 + 2 + 2 + 1 + 1 + 1 + filenameLength + 2;
     const headerSize = baseHeaderSize - 2; // Size doesn't include the size byte itself and checksum
 
     const header = new Uint8Array(baseHeaderSize);
@@ -103,7 +107,11 @@ export class LZHEncoder {
     offset += 2;
 
     // Calculate and set header checksum
-    header[checksumOffset] = this.calculateHeaderChecksum(header, 2, headerSize);
+    header[checksumOffset] = this.calculateHeaderChecksum(
+      header,
+      2,
+      headerSize,
+    );
 
     // Write header
     this.output.push(header);
@@ -113,19 +121,19 @@ export class LZHEncoder {
   }
 
   private writeByte(buffer: Uint8Array, offset: number, value: number): void {
-    buffer[offset] = value & 0xFF;
+    buffer[offset] = value & 0xff;
   }
 
   private writeWord(buffer: Uint8Array, offset: number, value: number): void {
-    buffer[offset] = value & 0xFF;
-    buffer[offset + 1] = (value >> 8) & 0xFF;
+    buffer[offset] = value & 0xff;
+    buffer[offset + 1] = (value >> 8) & 0xff;
   }
 
   private writeDWord(buffer: Uint8Array, offset: number, value: number): void {
-    buffer[offset] = value & 0xFF;
-    buffer[offset + 1] = (value >> 8) & 0xFF;
-    buffer[offset + 2] = (value >> 16) & 0xFF;
-    buffer[offset + 3] = (value >> 24) & 0xFF;
+    buffer[offset] = value & 0xff;
+    buffer[offset + 1] = (value >> 8) & 0xff;
+    buffer[offset + 2] = (value >> 16) & 0xff;
+    buffer[offset + 3] = (value >> 24) & 0xff;
   }
 
   private dateToDosTime(date: Date): { date: number; time: number } {
@@ -142,17 +150,21 @@ export class LZHEncoder {
     return { date: dosDate, time: dosTime };
   }
 
-  private calculateHeaderChecksum(header: Uint8Array, start: number, length: number): number {
+  private calculateHeaderChecksum(
+    header: Uint8Array,
+    start: number,
+    length: number,
+  ): number {
     let sum = 0;
     for (let i = start; i < start + length; i++) {
       sum += header[i];
     }
-    return sum & 0xFF;
+    return sum & 0xff;
   }
 
   private calculateCRC16(data: Uint8Array): number {
     let crc = 0;
-    
+
     for (let i = 0; i < data.length; i++) {
       crc ^= data[i] << 8;
       for (let j = 0; j < 8; j++) {
@@ -163,7 +175,7 @@ export class LZHEncoder {
         }
       }
     }
-    
-    return crc & 0xFFFF;
+
+    return crc & 0xffff;
   }
 }

@@ -2,7 +2,7 @@
 // npm install pe-library jszip buffer
 
 import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
-import * as Pe from "pe-library"; 
+import * as Pe from "pe-library";
 import JSZip from "jszip";
 
 import { Buffer } from "buffer";
@@ -12,7 +12,6 @@ if (typeof window !== "undefined") {
 }
 
 class peToZipHandler implements FormatHandler {
-
   public name: string = "petozip";
 
   public supportedFormats: FileFormat[] = [
@@ -23,7 +22,7 @@ class peToZipHandler implements FormatHandler {
       mime: "application/vnd.microsoft.portable-executable",
       from: true,
       to: false,
-      internal: "exe"
+      internal: "exe",
     },
     {
       name: "Dynamic-Link Library",
@@ -32,9 +31,9 @@ class peToZipHandler implements FormatHandler {
       mime: "application/vnd.microsoft.portable-executable",
       from: true,
       to: false,
-      internal: "dll"
+      internal: "dll",
     },
-    CommonFormats.ZIP.builder("zip").allowTo().markLossless()
+    CommonFormats.ZIP.builder("zip").allowTo().markLossless(),
   ];
 
   public ready: boolean = true;
@@ -46,9 +45,8 @@ class peToZipHandler implements FormatHandler {
   async doConvert(
     inputFiles: FileData[],
     inputFormat: FileFormat,
-    outputFormat: FileFormat
+    outputFormat: FileFormat,
   ): Promise<FileData[]> {
-
     if (outputFormat.format !== "zip") {
       throw new Error("Invalid output format. Only ZIP is supported.");
     }
@@ -65,7 +63,7 @@ class peToZipHandler implements FormatHandler {
         //@ts-ignore
         const peFile = Pe.NtExecutable.from(buffer);
         const ntHeader = peFile.newHeader;
-        
+
         const subsystemValue = ntHeader.optionalHeader.subsystem;
         const subsystemMap: Record<number, string> = {
           1: "Native",
@@ -73,18 +71,21 @@ class peToZipHandler implements FormatHandler {
           3: "Windows Console",
           7: "POSIX",
           9: "Windows CE",
-          10: "EFI Application"
+          10: "EFI Application",
         };
 
         const metadata = {
           originalFileName: inputFile.name,
           architecture: peFile.is32bit() ? "x86 (32-bit)" : "x64 (64-bit)",
-          compileTimestamp: new Date(ntHeader.fileHeader.timeDateStamp * 1000).toISOString(),
-          subsystem: subsystemMap[subsystemValue] || `Unknown (${subsystemValue})`,
+          compileTimestamp: new Date(
+            ntHeader.fileHeader.timeDateStamp * 1000,
+          ).toISOString(),
+          subsystem:
+            subsystemMap[subsystemValue] || `Unknown (${subsystemValue})`,
           imageBase: peFile.getImageBase(),
           sectionAlignment: peFile.getSectionAlignment(),
           imports: [] as any[],
-          exports: [] as any[]
+          exports: [] as any[],
         };
 
         zip.file("metadata.json", JSON.stringify(metadata, null, 2));
@@ -93,33 +94,35 @@ class peToZipHandler implements FormatHandler {
         const allSections = peFile.getAllSections();
 
         for (const section of allSections) {
-          const rawName = section.info.name.toString().replace(/\0/g, ''); 
-          const safeName = rawName.replace(/[^a-zA-Z0-9]/g, '');
-          const fileName = `section_${safeName || 'unnamed'}.bin`;
-          
+          const rawName = section.info.name.toString().replace(/\0/g, "");
+          const safeName = rawName.replace(/[^a-zA-Z0-9]/g, "");
+          const fileName = `section_${safeName || "unnamed"}.bin`;
+
           if (section.data) {
             zip.file(fileName, section.data);
           }
         }
-        
+
         // generate final ZIP
         const outputBytes = await zip.generateAsync({
           type: "uint8array",
           compression: "DEFLATE",
-          compressionOptions: { level: 9 }
+          compressionOptions: { level: 9 },
         });
-        
+
         const baseName = inputFile.name.split(".")[0];
         const newName = `${baseName}_pe_data.zip`;
 
         outputFiles.push({
           bytes: outputBytes,
-          name: newName
+          name: newName,
         });
-
-      } catch (e: any) { // error handling
+      } catch (e: any) {
+        // error handling
         console.error(`[petozip] Error converting ${inputFile.name}:`, e);
-        throw new Error(`Failed to process PE file ${inputFile.name}: ${e.message}`);
+        throw new Error(
+          `Failed to process PE file ${inputFile.name}: ${e.message}`,
+        );
       }
     }
 

@@ -8,16 +8,30 @@ class batToExeHandler implements FormatHandler {
   public name = "batToExe";
   public supportedFormats = [
     CommonFormats.BATCH.supported("bat", true, false),
-    { name: "Windows 64bit Executable", format: "executable", extension: "exe", mime: "binary/exe-win64", from: false, to: true, internal: "exe", category: "binary", lossless: true } // Tecnically it lossless because stores bat inside
+    {
+      name: "Windows 64bit Executable",
+      format: "executable",
+      extension: "exe",
+      mime: "binary/exe-win64",
+      from: false,
+      to: true,
+      internal: "exe",
+      category: "binary",
+      lossless: true,
+    }, // Tecnically it lossless because stores bat inside
   ];
   public ready = false;
 
-  private header: Uint8Array|null = null;
-  private footer: Uint8Array|null = null;
+  private header: Uint8Array | null = null;
+  private footer: Uint8Array | null = null;
 
   async init() {
-    this.header = await fetch(headUrl).then(res => res.arrayBuffer()).then(buf => new Uint8Array(buf));
-    this.footer = await fetch(footUrl).then(res => res.arrayBuffer()).then(buf => new Uint8Array(buf));;
+    this.header = await fetch(headUrl)
+      .then((res) => res.arrayBuffer())
+      .then((buf) => new Uint8Array(buf));
+    this.footer = await fetch(footUrl)
+      .then((res) => res.arrayBuffer())
+      .then((buf) => new Uint8Array(buf));
     this.ready = true;
   }
 
@@ -26,7 +40,6 @@ class batToExeHandler implements FormatHandler {
     inputFormat: FileFormat,
     outputFormat: FileFormat,
   ): Promise<FileData[]> {
-
     const header = this.header;
     const footer = this.footer;
     if (!this.ready || !header || !footer) throw "Handler not initialized!";

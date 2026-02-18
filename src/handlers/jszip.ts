@@ -3,11 +3,10 @@ import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
 import JSZip from "jszip";
 
 class jszipHandler implements FormatHandler {
-
   public name: string = "jszip";
 
   public supportedFormats: FileFormat[] = [
-    CommonFormats.ZIP.builder("zip").allowTo()
+    CommonFormats.ZIP.builder("zip").allowTo(),
   ];
 
   public supportAnyInput: boolean = true;
@@ -21,9 +20,8 @@ class jszipHandler implements FormatHandler {
   async doConvert(
     inputFiles: FileData[],
     inputFormat: FileFormat,
-    outputFormat: FileFormat
+    outputFormat: FileFormat,
   ): Promise<FileData[]> {
-
     const outputFiles: FileData[] = [];
     const zip = new JSZip();
 

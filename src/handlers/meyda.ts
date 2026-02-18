@@ -5,7 +5,6 @@ import CommonFormats from "src/CommonFormats.ts";
 import { WaveFile } from "wavefile";
 
 class meydaHandler implements FormatHandler {
-
   public name: string = "meyda";
   public supportedFormats: FileFormat[] = [
     // Lossy reconstruction due to 2 channel encoding
@@ -19,29 +18,31 @@ class meydaHandler implements FormatHandler {
   #canvas?: HTMLCanvasElement;
   #ctx?: CanvasRenderingContext2D;
 
-  async init () {
-
+  async init() {
     const dummy = document.createElement("audio");
     this.supportedFormats.push(
       CommonFormats.WAV.builder("audio")
         .allowFrom(dummy.canPlayType("audio/wav") !== "")
-        .allowTo()
+        .allowTo(),
     );
-    
-    if (dummy.canPlayType("audio/mpeg")) this.supportedFormats.push(
-      // lossless=false, lossy reconstruction 
-      CommonFormats.MP3.supported("audio", true, false)
-    );
-    if (dummy.canPlayType("audio/ogg")) this.supportedFormats.push(
-      CommonFormats.OGG.builder("audio").allowFrom()
-    );
-    if (dummy.canPlayType("audio/flac")) this.supportedFormats.push(
-      CommonFormats.FLAC.builder("audio").allowFrom()
-    );
+
+    if (dummy.canPlayType("audio/mpeg"))
+      this.supportedFormats.push(
+        // lossless=false, lossy reconstruction
+        CommonFormats.MP3.supported("audio", true, false),
+      );
+    if (dummy.canPlayType("audio/ogg"))
+      this.supportedFormats.push(
+        CommonFormats.OGG.builder("audio").allowFrom(),
+      );
+    if (dummy.canPlayType("audio/flac"))
+      this.supportedFormats.push(
+        CommonFormats.FLAC.builder("audio").allowFrom(),
+      );
     dummy.remove();
 
     this.#audioContext = new AudioContext({
-      sampleRate: 44100
+      sampleRate: 44100,
     });
 
     this.#canvas = document.createElement("canvas");
@@ -50,26 +51,20 @@ class meydaHandler implements FormatHandler {
     this.#ctx = ctx;
 
     this.ready = true;
-
   }
 
-  async doConvert (
+  async doConvert(
     inputFiles: FileData[],
     inputFormat: FileFormat,
-    outputFormat: FileFormat
+    outputFormat: FileFormat,
   ): Promise<FileData[]> {
-    if (
-      !this.ready
-      || !this.#audioContext
-      || !this.#canvas
-      || !this.#ctx
-    ) {
+    if (!this.ready || !this.#audioContext || !this.#canvas || !this.#ctx) {
       throw "Handler not initialized!";
     }
     const outputFiles: FileData[] = [];
 
-    const inputIsImage = (inputFormat.internal === "image");
-    const outputIsImage = (outputFormat.internal === "image");
+    const inputIsImage = inputFormat.internal === "image";
+    const outputIsImage = outputFormat.internal === "image";
 
     const bufferSize = 2048;
     const hopSize = bufferSize / 2;
@@ -80,10 +75,11 @@ class meydaHandler implements FormatHandler {
 
     if (inputIsImage) {
       for (const inputFile of inputFiles) {
-
         this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.width);
 
-        const blob = new Blob([inputFile.bytes as BlobPart], { type: inputFormat.mime });
+        const blob = new Blob([inputFile.bytes as BlobPart], {
+          type: inputFormat.mime,
+        });
         const url = URL.createObjectURL(blob);
 
         const image = new Image();
@@ -110,9 +106,9 @@ class meydaHandler implements FormatHandler {
         // Precompute sine and cosine waves for each frequency
         const sineWaves = new Float32Array(imageHeight * bufferSize);
         const cosineWaves = new Float32Array(imageHeight * bufferSize);
-        for (let y = 0; y < imageHeight; y ++) {
+        for (let y = 0; y < imageHeight; y++) {
           const frequency = (y / imageHeight) * (sampleRate / 2);
-          for (let s = 0; s < bufferSize; s ++) {
+          for (let s = 0; s < bufferSize; s++) {
             const timeInSeconds = s / sampleRate;
             const angle = 2 * Math.PI * frequency * timeInSeconds;
             sineWaves[y * bufferSize + s] = Math.sin(angle);
@@ -120,40 +116,42 @@ class meydaHandler implements FormatHandler {
           }
         }
 
-        for (let x = 0; x < imageWidth; x ++) {
+        for (let x = 0; x < imageWidth; x++) {
           const frameData = new Float32Array(bufferSize);
 
-          for (let y = 0; y < imageHeight; y ++) {
+          for (let y = 0; y < imageHeight; y++) {
             const pixelIndex = (x + (imageHeight - y - 1) * imageWidth) * 4;
 
             // Extract amplitude from R and G channels
-            const magInt = pixelBuffer[pixelIndex] + (pixelBuffer[pixelIndex + 1] << 8);
+            const magInt =
+              pixelBuffer[pixelIndex] + (pixelBuffer[pixelIndex + 1] << 8);
             const amplitude = magInt / 65535;
             // Extract phase from B channel
-            const phase = (pixelBuffer[pixelIndex + 2] / 255) * (2 * Math.PI) - Math.PI;
+            const phase =
+              (pixelBuffer[pixelIndex + 2] / 255) * (2 * Math.PI) - Math.PI;
 
-            for (let s = 0; s < bufferSize; s ++) {
-              frameData[s] += amplitude * (
-                cosineWaves[y * bufferSize + s] * Math.cos(phase)
-                - sineWaves[y * bufferSize + s] * Math.sin(phase)
-              );
+            for (let s = 0; s < bufferSize; s++) {
+              frameData[s] +=
+                amplitude *
+                (cosineWaves[y * bufferSize + s] * Math.cos(phase) -
+                  sineWaves[y * bufferSize + s] * Math.sin(phase));
             }
           }
 
           // overlap-add
           const outputOffset = x * hopSize;
-          for (let s = 0; s < bufferSize; s ++) {
+          for (let s = 0; s < bufferSize; s++) {
             audioData[outputOffset + s] += frameData[s];
           }
         }
 
         // Normalize output
         let max = 0;
-        for (let i = 0; i < imageWidth * bufferSize; i ++) {
+        for (let i = 0; i < imageWidth * bufferSize; i++) {
           const magnitude = Math.abs(audioData[i]);
           if (magnitude > max) max = magnitude;
         }
-        for (let i = 0; i < audioData.length; i ++) {
+        for (let i = 0; i < audioData.length; i++) {
           audioData[i] /= max;
         }
 
@@ -161,20 +159,24 @@ class meydaHandler implements FormatHandler {
         wav.fromScratch(1, sampleRate, "32f", audioData);
 
         const bytes = wav.toBuffer();
-        const name = inputFile.name.split(".")[0] + "." + outputFormat.extension;
+        const name =
+          inputFile.name.split(".")[0] + "." + outputFormat.extension;
         outputFiles.push({ bytes, name });
-
       }
     } else {
       for (const inputFile of inputFiles) {
-
         const inputBytes = new Uint8Array(inputFile.bytes);
-        const audioData = await this.#audioContext.decodeAudioData(inputBytes.buffer);
+        const audioData = await this.#audioContext.decodeAudioData(
+          inputBytes.buffer,
+        );
 
         Meyda.bufferSize = bufferSize;
         Meyda.sampleRate = audioData.sampleRate;
         const samples = audioData.getChannelData(0);
-        const imageWidth = Math.max(1, Math.ceil((samples.length - bufferSize) / hopSize) + 1);
+        const imageWidth = Math.max(
+          1,
+          Math.ceil((samples.length - bufferSize) / hopSize) + 1,
+        );
         const imageHeight = Meyda.bufferSize / 2;
 
         this.#canvas.width = imageWidth;
@@ -182,11 +184,15 @@ class meydaHandler implements FormatHandler {
 
         const frameBuffer = new Float32Array(bufferSize);
 
-        for (let i = 0; i < imageWidth; i ++) {
-
+        for (let i = 0; i < imageWidth; i++) {
           const start = i * hopSize;
           frameBuffer.fill(0);
-          frameBuffer.set(samples.subarray(start, Math.min(start + bufferSize, samples.length)));
+          frameBuffer.set(
+            samples.subarray(
+              start,
+              Math.min(start + bufferSize, samples.length),
+            ),
+          );
           const spectrum = Meyda.extract("complexSpectrum", frameBuffer);
           if (!spectrum || !("real" in spectrum) || !("imag" in spectrum)) {
             throw "Failed to extract audio features!";
@@ -195,41 +201,47 @@ class meydaHandler implements FormatHandler {
           const imaginary = spectrum.imag as Float32Array;
 
           const pixels = new Uint8ClampedArray(imageHeight * 4);
-          for (let j = 0; j < imageHeight; j ++) {
+          for (let j = 0; j < imageHeight; j++) {
             // Calculate amplitude, amplitude is halved when only half of the FFT is used, so double it
-            const magnitude = Math.sqrt(real[j] * real[j] + imaginary[j] * imaginary[j]) / bufferSize * 2;
+            const magnitude =
+              (Math.sqrt(real[j] * real[j] + imaginary[j] * imaginary[j]) /
+                bufferSize) *
+              2;
             const phase = Math.atan2(imaginary[j], real[j]);
             const pixelIndex = (imageHeight - j - 1) * 4;
             // Encode magnitude in R, G channels
             const magInt = Math.floor(Math.min(magnitude * 65535, 65535));
-            pixels[pixelIndex] = magInt & 0xFF;
-            pixels[pixelIndex + 1] = (magInt >> 8) & 0xFF;
+            pixels[pixelIndex] = magInt & 0xff;
+            pixels[pixelIndex + 1] = (magInt >> 8) & 0xff;
             // Encode phase in B channel
-            const phaseNormalized = Math.floor(((phase + Math.PI) / (2 * Math.PI)) * 255);
+            const phaseNormalized = Math.floor(
+              ((phase + Math.PI) / (2 * Math.PI)) * 255,
+            );
             pixels[pixelIndex + 2] = phaseNormalized;
-            pixels[pixelIndex + 3] = 0xFF;
+            pixels[pixelIndex + 3] = 0xff;
           }
-          const imageData = new ImageData(pixels as ImageDataArray, 1, imageHeight);
+          const imageData = new ImageData(
+            pixels as ImageDataArray,
+            1,
+            imageHeight,
+          );
           this.#ctx.putImageData(imageData, i, 0);
-
         }
 
         const bytes: Uint8Array = await new Promise((resolve, reject) => {
           this.#canvas!.toBlob((blob) => {
             if (!blob) return reject("Canvas output failed.");
-            blob.arrayBuffer().then(buf => resolve(new Uint8Array(buf)));
+            blob.arrayBuffer().then((buf) => resolve(new Uint8Array(buf)));
           }, outputFormat.mime);
         });
-        const name = inputFile.name.split(".")[0] + "." + outputFormat.extension;
+        const name =
+          inputFile.name.split(".")[0] + "." + outputFormat.extension;
         outputFiles.push({ bytes, name });
-
       }
     }
 
-
     return outputFiles;
   }
-
 }
 
 export default meydaHandler;

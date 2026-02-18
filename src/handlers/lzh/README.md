@@ -7,14 +7,14 @@ This handler implements LZH (Lempel-Ziv-Huffman) and LHA archive format support 
 - **Custom Implementation**: Pure TypeScript implementation without external dependencies
 - **Archive Extraction**: Extracts files from LZH/LHA archives
 - **Archive Creation**: Creates LZH/LHA archives from files
-- **Format Conversion**: 
+- **Format Conversion**:
   - **From LZH/LHA**: Converts to ZIP, JSON, or extracts individual files
   - **To LZH/LHA**: Creates archives from ZIP files or any other input files
 - **Multiple Compression Methods**: Supports various LZH compression methods:
   - `-lh0-`: Uncompressed (store only) - used for creating archives
   - `-lh1-`: LZSS with 4KB sliding dictionary
   - `-lh4-`: LZSS with 8KB dictionary and Huffman coding
-  - `-lh5-`: LZSS with 8KB dictionary and Huffman coding  
+  - `-lh5-`: LZSS with 8KB dictionary and Huffman coding
   - `-lh6-`: LZSS with 32KB dictionary and Huffman coding
   - `-lh7-`: LZSS with 64KB dictionary and Huffman coding
   - `-lhd-`: Directory entry
@@ -77,9 +77,10 @@ The main handler provides:
 - Support for nested directories in archives
 
 ## Usage
-  - ZIP archives (preserves all file data and timestamps)
-  - JSON files (archive metadata and file listing)
-  - Extracted individual files
+
+- ZIP archives (preserves all file data and timestamps)
+- JSON files (archive metadata and file listing)
+- Extracted individual files
 
 ### JSON Output Example
 

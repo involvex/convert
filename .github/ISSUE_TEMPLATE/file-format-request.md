@@ -3,8 +3,7 @@ name: File format request
 about: For requesting new file formats or conversion routes.
 title: "[File format]"
 labels: format request
-assignees: ''
-
+assignees: ""
 ---
 
 **Describe the file format**

@@ -32,37 +32,101 @@ import libopenmptHandler from "./libopenmpt.ts";
 import lzhHandler from "./lzh.ts";
 
 const handlers: FormatHandler[] = [];
-try { handlers.push(new svgTraceHandler()) } catch (_) { };
-try { handlers.push(new canvasToBlobHandler()) } catch (_) { };
-try { handlers.push(new meydaHandler()) } catch (_) { };
-try { handlers.push(new htmlEmbedHandler()) } catch (_) { };
-try { handlers.push(new FFmpegHandler()) } catch (_) { };
-try { handlers.push(new pdftoimgHandler()) } catch (_) { };
-try { handlers.push(new ImageMagickHandler()) } catch (_) { };
-try { handlers.push(renameZipHandler) } catch (_) { };
-try { handlers.push(renameTxtHandler) } catch (_) { };
-try { handlers.push(new envelopeHandler()) } catch (_) { };
-try { handlers.push(new svgForeignObjectHandler()) } catch (_) { };
-try { handlers.push(new qoiFuHandler()) } catch (_) { };
-try { handlers.push(new sppdHandler()) } catch (_) { };
-try { handlers.push(new threejsHandler()) } catch (_) { };
-try { handlers.push(new sqlite3Handler()) } catch (_) { };
-try { handlers.push(new vtfHandler()) } catch (_) { };
-try { handlers.push(new mcMapHandler()) } catch (_) { };
-try { handlers.push(new jszipHandler()) } catch (_) { };
-try { handlers.push(new qoaFuHandler()) } catch (_) { };
-try { handlers.push(new pyTurtleHandler()) } catch (_) { };
-try { handlers.push(new fromJsonHandler()) } catch (_) { };
-try { handlers.push(new toJsonHandler()) } catch (_) { };
-try { handlers.push(new nbtHandler()) } catch (_) { };
-try { handlers.push(new peToZipHandler()) } catch (_) { };
-try { handlers.push(new flptojsonHandler()) } catch (_) { };
-try { handlers.push(new floHandler()) } catch (_) { };
-try { handlers.push(new cgbiToPngHandler()) } catch (_) { };
-try { handlers.push(new batToExeHandler()) } catch (_) { };
-try { handlers.push(new textEncodingHandler()) } catch (_) { };
-try { handlers.push(new libopenmptHandler()) } catch (_) { };
-try { handlers.push(new lzhHandler()) } catch (_) { };
-try { handlers.push(new pandocHandler()) } catch (_) { };
+try {
+  handlers.push(new svgTraceHandler());
+} catch (_) {}
+try {
+  handlers.push(new canvasToBlobHandler());
+} catch (_) {}
+try {
+  handlers.push(new meydaHandler());
+} catch (_) {}
+try {
+  handlers.push(new htmlEmbedHandler());
+} catch (_) {}
+try {
+  handlers.push(new FFmpegHandler());
+} catch (_) {}
+try {
+  handlers.push(new pdftoimgHandler());
+} catch (_) {}
+try {
+  handlers.push(new ImageMagickHandler());
+} catch (_) {}
+try {
+  handlers.push(renameZipHandler);
+} catch (_) {}
+try {
+  handlers.push(renameTxtHandler);
+} catch (_) {}
+try {
+  handlers.push(new envelopeHandler());
+} catch (_) {}
+try {
+  handlers.push(new svgForeignObjectHandler());
+} catch (_) {}
+try {
+  handlers.push(new qoiFuHandler());
+} catch (_) {}
+try {
+  handlers.push(new sppdHandler());
+} catch (_) {}
+try {
+  handlers.push(new threejsHandler());
+} catch (_) {}
+try {
+  handlers.push(new sqlite3Handler());
+} catch (_) {}
+try {
+  handlers.push(new vtfHandler());
+} catch (_) {}
+try {
+  handlers.push(new mcMapHandler());
+} catch (_) {}
+try {
+  handlers.push(new jszipHandler());
+} catch (_) {}
+try {
+  handlers.push(new qoaFuHandler());
+} catch (_) {}
+try {
+  handlers.push(new pyTurtleHandler());
+} catch (_) {}
+try {
+  handlers.push(new fromJsonHandler());
+} catch (_) {}
+try {
+  handlers.push(new toJsonHandler());
+} catch (_) {}
+try {
+  handlers.push(new nbtHandler());
+} catch (_) {}
+try {
+  handlers.push(new peToZipHandler());
+} catch (_) {}
+try {
+  handlers.push(new flptojsonHandler());
+} catch (_) {}
+try {
+  handlers.push(new floHandler());
+} catch (_) {}
+try {
+  handlers.push(new cgbiToPngHandler());
+} catch (_) {}
+try {
+  handlers.push(new batToExeHandler());
+} catch (_) {}
+try {
+  handlers.push(new textEncodingHandler());
+} catch (_) {}
+try {
+  handlers.push(new libopenmptHandler());
+} catch (_) {}
+try {
+  handlers.push(new lzhHandler());
+} catch (_) {}
+try {
+  handlers.push(new pandocHandler());
+} catch (_) {}
 
 export default handlers;

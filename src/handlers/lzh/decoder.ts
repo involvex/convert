@@ -63,10 +63,10 @@ export class LZHDecoder {
     }
     // Only decode up to the null terminator
     const validBytes = bytes.slice(0, actualLength);
-    const decoder = new TextDecoder('utf-8', { fatal: false });
+    const decoder = new TextDecoder("utf-8", { fatal: false });
     let str = decoder.decode(validBytes);
     // Remove any remaining null bytes and control characters
-    str = str.replace(/[\x00-\x1F\x7F]/g, '');
+    str = str.replace(/[\x00-\x1F\x7F]/g, "");
     return str;
   }
 
@@ -75,7 +75,7 @@ export class LZHDecoder {
    */
   public extractAll(): LHAFile[] {
     const files: LHAFile[] = [];
-    
+
     while (this.offset < this.data.length) {
       try {
         const file = this.readHeader();
@@ -86,7 +86,7 @@ export class LZHDecoder {
         break;
       }
     }
-    
+
     return files;
   }
 
@@ -102,49 +102,55 @@ export class LZHDecoder {
 
     const startOffset = this.offset - 1;
     const headerChecksum = this.readByte();
-    
+
     // Read method (5 bytes)
     const method = this.readString(5);
-    
+
     // Validate method string
-    if (!method.startsWith('-lh') && !method.startsWith('-lz') && method !== '-lhd-') {
+    if (
+      !method.startsWith("-lh") &&
+      !method.startsWith("-lz") &&
+      method !== "-lhd-"
+    ) {
       console.warn(`Unknown compression method: ${method}`);
       // Try to skip this entry
       return null;
     }
-    
+
     // Read compressed size
     const compressedSize = this.readDWord();
-    
+
     // Read original size
     const originalSize = this.readDWord();
-    
+
     // Sanity check sizes
     if (compressedSize > this.data.length || originalSize > 100 * 1024 * 1024) {
-      console.warn(`Suspicious file sizes: compressed=${compressedSize}, original=${originalSize}`);
+      console.warn(
+        `Suspicious file sizes: compressed=${compressedSize}, original=${originalSize}`,
+      );
       return null;
     }
-    
+
     // Read timestamp (MS-DOS format)
     const dosTime = this.readWord();
     const dosDate = this.readWord();
     const timestamp = this.dosDateTimeToDate(dosDate, dosTime);
-    
+
     // Read attributes
     const attributes = this.readByte();
-    
+
     // Read level
     const level = this.readByte();
-    
+
     // Read filename length
     const filenameLength = this.readByte();
-    
+
     // Read filename
     const filename = this.readString(filenameLength);
-    
+
     // Read CRC
     const crc = this.readWord();
-    
+
     // Read OS type
     let os = 0;
     if (level >= 1) {
@@ -169,25 +175,32 @@ export class LZHDecoder {
 
     // Read compressed data
     if (this.offset + compressedSize > this.data.length) {
-      console.warn(`Compressed data extends beyond file bounds: need ${compressedSize} bytes, only ${this.data.length - this.offset} available`);
+      console.warn(
+        `Compressed data extends beyond file bounds: need ${compressedSize} bytes, only ${this.data.length - this.offset} available`,
+      );
       return null;
     }
-    
+
     const compressedData = this.readBytes(compressedSize);
-    
+
     // Decompress the data
     let decompressedData: Uint8Array;
-    
-    if (method === '-lh0-') {
+
+    if (method === "-lh0-") {
       // No compression
       decompressedData = compressedData;
-    } else if (method === '-lh1-') {
+    } else if (method === "-lh1-") {
       // LH1 (4KB dictionary, old method)
       decompressedData = this.decompressLH1(compressedData, originalSize);
-    } else if (method === '-lh4-' || method === '-lh5-' || method === '-lh6-' || method === '-lh7-') {
+    } else if (
+      method === "-lh4-" ||
+      method === "-lh5-" ||
+      method === "-lh6-" ||
+      method === "-lh7-"
+    ) {
       // LH4/5/6/7 (modern methods with different dictionary sizes)
       decompressedData = this.decompressLH5(compressedData, originalSize);
-    } else if (method === '-lhd-') {
+    } else if (method === "-lhd-") {
       // Directory entry
       decompressedData = new Uint8Array(0);
     } else {
@@ -196,8 +209,9 @@ export class LZHDecoder {
     }
 
     // Sanitize filename to ensure it's valid UTF-8 without null bytes
-    const sanitizedFilename = filename.replace(/[\x00-\x1F\x7F]/g, '').trim() || 'unnamed';
-    
+    const sanitizedFilename =
+      filename.replace(/[\x00-\x1F\x7F]/g, "").trim() || "unnamed";
+
     return {
       filename: sanitizedFilename,
       originalSize,
@@ -206,25 +220,28 @@ export class LZHDecoder {
       crc,
       method,
       os,
-      data: decompressedData
+      data: decompressedData,
     };
   }
 
   private dosDateTimeToDate(dosDate: number, dosTime: number): Date {
-    const year = 1980 + ((dosDate >> 9) & 0x7F);
-    const month = ((dosDate >> 5) & 0x0F) - 1;
-    const day = dosDate & 0x1F;
-    const hour = (dosTime >> 11) & 0x1F;
-    const minute = (dosTime >> 5) & 0x3F;
-    const second = (dosTime & 0x1F) * 2;
-    
+    const year = 1980 + ((dosDate >> 9) & 0x7f);
+    const month = ((dosDate >> 5) & 0x0f) - 1;
+    const day = dosDate & 0x1f;
+    const hour = (dosTime >> 11) & 0x1f;
+    const minute = (dosTime >> 5) & 0x3f;
+    const second = (dosTime & 0x1f) * 2;
+
     return new Date(year, month, day, hour, minute, second);
   }
 
   /**
    * Decompress LH1 format (LZSS with 4KB dictionary)
    */
-  private decompressLH1(compressed: Uint8Array, originalSize: number): Uint8Array {
+  private decompressLH1(
+    compressed: Uint8Array,
+    originalSize: number,
+  ): Uint8Array {
     const output = new Uint8Array(originalSize);
     const dictionary = new Uint8Array(4096);
     let outPos = 0;
@@ -264,7 +281,7 @@ export class LZHDecoder {
         // Match
         const position = getBits(12);
         const length = getBits(4) + 3;
-        
+
         for (let i = 0; i < length && outPos < originalSize; i++) {
           const byte = dictionary[position];
           output[outPos++] = byte;
@@ -281,7 +298,10 @@ export class LZHDecoder {
    * Decompress LH5/6/7 format (LZSS with Huffman coding)
    * Simplified implementation
    */
-  private decompressLH5(compressed: Uint8Array, originalSize: number): Uint8Array {
+  private decompressLH5(
+    compressed: Uint8Array,
+    originalSize: number,
+  ): Uint8Array {
     // This is a simplified version
     // Full implementation would require proper Huffman tree decoding
     const output = new Uint8Array(originalSize);
@@ -294,8 +314,12 @@ export class LZHDecoder {
     // Simplified LZSS decompression without proper Huffman
     while (outPos < originalSize && inPos < compressed.length) {
       const flag = compressed[inPos++];
-      
-      for (let bit = 0; bit < 8 && outPos < originalSize && inPos < compressed.length; bit++) {
+
+      for (
+        let bit = 0;
+        bit < 8 && outPos < originalSize && inPos < compressed.length;
+        bit++
+      ) {
         if (flag & (1 << bit)) {
           // Literal
           const byte = compressed[inPos++];
@@ -307,9 +331,9 @@ export class LZHDecoder {
           if (inPos + 1 >= compressed.length) break;
           const byte1 = compressed[inPos++];
           const byte2 = compressed[inPos++];
-          const offset = ((byte2 & 0xF0) << 4) | byte1;
-          const length = (byte2 & 0x0F) + 3;
-          
+          const offset = ((byte2 & 0xf0) << 4) | byte1;
+          const length = (byte2 & 0x0f) + 3;
+
           for (let i = 0; i < length && outPos < originalSize; i++) {
             const pos = (windowPos - offset + windowSize) % windowSize;
             const byte = window[pos];

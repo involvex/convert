@@ -4,10 +4,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   optimizeDeps: {
-    exclude: [
-      "@ffmpeg/ffmpeg",
-      "@sqlite.org/sqlite-wasm",
-    ]
+    exclude: ["@ffmpeg/ffmpeg", "@sqlite.org/sqlite-wasm"],
   },
   base: "/convert/",
   plugins: [
@@ -15,30 +12,30 @@ export default defineConfig({
       targets: [
         {
           src: "node_modules/@flo-audio/reflo/reflo_bg.wasm",
-          dest: "wasm"
+          dest: "wasm",
         },
         {
           src: "src/handlers/pandoc/pandoc.wasm",
-          dest: "wasm"
+          dest: "wasm",
         },
         {
           src: "node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.*",
-          dest: "wasm"
+          dest: "wasm",
         },
         {
           src: "node_modules/@imagemagick/magick-wasm/dist/magick.wasm",
-          dest: "wasm"
+          dest: "wasm",
         },
         {
           src: "src/handlers/libopenmpt/libopenmpt.wasm",
-          dest: "wasm"
+          dest: "wasm",
         },
         {
           src: "src/handlers/libopenmpt/libopenmpt.js",
-          dest: "wasm"
-        }
-      ]
+          dest: "wasm",
+        },
+      ],
     }),
-    tsconfigPaths()
-  ]
+    tsconfigPaths(),
+  ],
 });

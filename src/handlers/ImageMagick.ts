@@ -3,7 +3,7 @@ import {
   Magick,
   MagickFormat,
   MagickImageCollection,
-  MagickReadSettings
+  MagickReadSettings,
 } from "@imagemagick/magick-wasm";
 
 import mime from "mime";
@@ -12,31 +12,30 @@ import normalizeMimeType from "../normalizeMimeType.ts";
 import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
 
 class ImageMagickHandler implements FormatHandler {
-
   public name: string = "ImageMagick";
 
   public supportedFormats: FileFormat[] = [];
 
   public ready: boolean = false;
 
-  async init () {
-
+  async init() {
     const wasmLocation = "/convert/wasm/magick.wasm";
-    const wasmBytes = await fetch(wasmLocation).then(r => r.bytes());
+    const wasmBytes = await fetch(wasmLocation).then((r) => r.bytes());
 
     await initializeImageMagick(wasmBytes);
 
-    Magick.supportedFormats.forEach(format => {
+    Magick.supportedFormats.forEach((format) => {
       const formatName = format.format.toLowerCase();
       if (formatName === "apng") return;
       if (formatName === "svg") return;
       const mimeType = format.mimeType || mime.getType(formatName);
       if (
-        !mimeType
-        || mimeType.startsWith("text/")
-        || mimeType.startsWith("video/")
-        || mimeType === "application/json"
-      ) return;
+        !mimeType ||
+        mimeType.startsWith("text/") ||
+        mimeType.startsWith("video/") ||
+        mimeType === "application/json"
+      )
+        return;
       this.supportedFormats.push({
         name: format.description,
         format: formatName === "jpg" ? "jpeg" : formatName,
@@ -46,7 +45,7 @@ class ImageMagickHandler implements FormatHandler {
         to: format.supportsWriting,
         internal: format.format,
         category: mimeType.split("/")[0],
-        lossless: ["png", "bmp", "tiff"].includes(formatName)
+        lossless: ["png", "bmp", "tiff"].includes(formatName),
       });
     });
 
@@ -64,28 +63,26 @@ class ImageMagickHandler implements FormatHandler {
     this.ready = true;
   }
 
-  async doConvert (
+  async doConvert(
     inputFiles: FileData[],
     inputFormat: FileFormat,
-    outputFormat: FileFormat
+    outputFormat: FileFormat,
   ): Promise<FileData[]> {
-
     const inputMagickFormat = inputFormat.internal as MagickFormat;
     const outputMagickFormat = outputFormat.internal as MagickFormat;
 
     const inputSettings = new MagickReadSettings();
     inputSettings.format = inputMagickFormat;
 
-
-    const bytes: Uint8Array = await new Promise(resolve => {
-      MagickImageCollection.use(outputCollection => {
+    const bytes: Uint8Array = await new Promise((resolve) => {
+      MagickImageCollection.use((outputCollection) => {
         for (const inputFile of inputFiles) {
-           if (inputFormat.format == "rgb") {
-             // Guess how big the Image should be
-             inputSettings.width = Math.sqrt(inputFile.bytes.length / 3);
-             inputSettings.height = inputSettings.width;
-           }
-          MagickImageCollection.use(fileCollection => {
+          if (inputFormat.format == "rgb") {
+            // Guess how big the Image should be
+            inputSettings.width = Math.sqrt(inputFile.bytes.length / 3);
+            inputSettings.height = inputSettings.width;
+          }
+          MagickImageCollection.use((fileCollection) => {
             fileCollection.read(inputFile.bytes, inputSettings);
             while (fileCollection.length > 0) {
               const image = fileCollection.shift();
@@ -103,9 +100,7 @@ class ImageMagickHandler implements FormatHandler {
     const baseName = inputFiles[0].name.split(".")[0];
     const name = baseName + "." + outputFormat.extension;
     return [{ bytes, name }];
-
   }
-
 }
 
 export default ImageMagickHandler;

@@ -55,7 +55,7 @@ const { instance } = await WebAssembly.instantiateStreaming(
   fetch("/convert/wasm/pandoc.wasm"),
   {
     wasi_snapshot_preview1: wasi.wasiImport,
-  }
+  },
 );
 
 wasi.initialize(instance);
@@ -72,7 +72,7 @@ for (let i = 0; i < args.length; ++i) {
   const arg = instance.exports.malloc(args[i].length + 1);
   new TextEncoder().encodeInto(
     args[i],
-    new Uint8Array(instance.exports.memory.buffer, arg, args[i].length)
+    new Uint8Array(instance.exports.memory.buffer, arg, args[i].length),
   );
   memory_data_view().setUint8(arg + args[i].length, 0);
   memory_data_view().setUint32(argv + 4 * i, arg, true);
@@ -87,31 +87,40 @@ export async function query(options) {
   const opts_str = JSON.stringify(options);
   const opts_bytes = new TextEncoder().encode(opts_str);
   const opts_ptr = instance.exports.malloc(opts_bytes.length);
-  new Uint8Array(instance.exports.memory.buffer, opts_ptr, opts_bytes.length)
-    .set(opts_bytes);
+  new Uint8Array(
+    instance.exports.memory.buffer,
+    opts_ptr,
+    opts_bytes.length,
+  ).set(opts_bytes);
   // add input files to fileSystem
-  fileSystem.clear()
+  fileSystem.clear();
   const out_file = new File(new Uint8Array(), { readonly: false });
   const err_file = new File(new Uint8Array(), { readonly: false });
   fileSystem.set("stdout", out_file);
   fileSystem.set("stderr", err_file);
   instance.exports.query(opts_ptr, opts_bytes.length);
 
-  const err_text = new TextDecoder("utf-8", { fatal: true }).decode(err_file.data);
+  const err_text = new TextDecoder("utf-8", { fatal: true }).decode(
+    err_file.data,
+  );
   if (err_text) console.log(err_text);
-  const out_text = new TextDecoder("utf-8", { fatal: true }).decode(out_file.data);
+  const out_text = new TextDecoder("utf-8", { fatal: true }).decode(
+    out_file.data,
+  );
   return JSON.parse(out_text);
 }
-
 
 export async function convert(options, stdin, files) {
   const opts_str = JSON.stringify(options);
   const opts_bytes = new TextEncoder().encode(opts_str);
   const opts_ptr = instance.exports.malloc(opts_bytes.length);
-  new Uint8Array(instance.exports.memory.buffer, opts_ptr, opts_bytes.length)
-    .set(opts_bytes);
+  new Uint8Array(
+    instance.exports.memory.buffer,
+    opts_ptr,
+    opts_bytes.length,
+  ).set(opts_bytes);
   // add input files to fileSystem
-  fileSystem.clear()
+  fileSystem.clear();
   const in_file = new File(new Uint8Array(), { readonly: true });
   const out_file = new File(new Uint8Array(), { readonly: false });
   const err_file = new File(new Uint8Array(), { readonly: false });
@@ -137,18 +146,21 @@ export async function convert(options, stdin, files) {
   instance.exports.convert(opts_ptr, opts_bytes.length);
 
   if (options["output-file"]) {
-    files[options["output-file"]] =
-      new Blob([fileSystem.get(options["output-file"]).data]);
+    files[options["output-file"]] = new Blob([
+      fileSystem.get(options["output-file"]).data,
+    ]);
   }
   if (options["extract-media"]) {
     const mediaFile = fileSystem.get(options["extract-media"]);
     if (mediaFile && mediaFile.data && mediaFile.data.length > 0) {
-      files[options["extract-media"]] =
-        new Blob([mediaFile.data], { type: 'application/zip' });
+      files[options["extract-media"]] = new Blob([mediaFile.data], {
+        type: "application/zip",
+      });
     }
   }
-  const rawWarnings = new TextDecoder("utf-8", { fatal: true })
-    .decode(warnings_file.data);
+  const rawWarnings = new TextDecoder("utf-8", { fatal: true }).decode(
+    warnings_file.data,
+  );
   let warnings = [];
   if (rawWarnings) {
     warnings = JSON.parse(rawWarnings);
@@ -156,7 +168,7 @@ export async function convert(options, stdin, files) {
   return {
     stdout: new TextDecoder("utf-8", { fatal: true }).decode(out_file.data),
     stderr: new TextDecoder("utf-8", { fatal: true }).decode(err_file.data),
-    warnings: warnings
+    warnings: warnings,
   };
 }
 

@@ -8,18 +8,18 @@ function renameHandler(name: string, formats: FileFormat[]): FormatHandler {
     ready: true,
     supportedFormats: formats,
     async init() {
-      this.ready = true
+      this.ready = true;
     },
-    async doConvert (
+    async doConvert(
       inputFiles: FileData[],
       inputFormat: FileFormat,
-      outputFormat: FileFormat
+      outputFormat: FileFormat,
     ): Promise<FileData[]> {
-      return inputFiles.map(file => {
+      return inputFiles.map((file) => {
         file.name = file.name.split(".")[0] + "." + outputFormat.extension;
         return file;
       });
-    }
+    },
   };
 }
 /// handler for renaming various aliased zip files
@@ -36,7 +36,7 @@ export const renameZipHandler = renameHandler("renamezip", [
     from: true,
     to: false,
     internal: "odt",
-    category: "document"
+    category: "document",
   },
   {
     name: "OpenDocument Presentation",
@@ -46,7 +46,7 @@ export const renameZipHandler = renameHandler("renamezip", [
     from: true,
     to: false,
     internal: "odp",
-    category: "presentation"
+    category: "presentation",
   },
   {
     name: "OpenDocument Spreadsheet",
@@ -56,7 +56,7 @@ export const renameZipHandler = renameHandler("renamezip", [
     from: true,
     to: false,
     internal: "ods",
-    category: "spreadsheet"
+    category: "spreadsheet",
   },
   {
     name: "Firefox Plugin",
@@ -65,14 +65,23 @@ export const renameZipHandler = renameHandler("renamezip", [
     mime: "application/x-xpinstall",
     from: true,
     to: false,
-    internal: "xpi"
+    internal: "xpi",
   },
-  CommonFormats.ZIP.builder("love").allowFrom()
-    .withFormat("love").withExt("love").named("LÖVE Game Package"),
-  CommonFormats.ZIP.builder("osz").allowFrom()
-    .withFormat("osz").withExt("osz").named("osu! Beatmap"),
-  CommonFormats.ZIP.builder("osk").allowFrom()
-    .withFormat("osk").withExt("osk").named("osu! Skin"),
+  CommonFormats.ZIP.builder("love")
+    .allowFrom()
+    .withFormat("love")
+    .withExt("love")
+    .named("LÖVE Game Package"),
+  CommonFormats.ZIP.builder("osz")
+    .allowFrom()
+    .withFormat("osz")
+    .withExt("osz")
+    .named("osu! Beatmap"),
+  CommonFormats.ZIP.builder("osk")
+    .allowFrom()
+    .withFormat("osk")
+    .withExt("osk")
+    .named("osu! Skin"),
   {
     name: "Java Archive",
     format: "jar",
@@ -80,7 +89,7 @@ export const renameZipHandler = renameHandler("renamezip", [
     mime: "application/x-java-archive",
     from: true,
     to: false,
-    internal: "jar"
+    internal: "jar",
   },
   {
     name: "Android Package Archive",
@@ -89,13 +98,13 @@ export const renameZipHandler = renameHandler("renamezip", [
     mime: "application/vnd.android.package-archive",
     from: true,
     to: false,
-    internal: "apk"
-  }
+    internal: "apk",
+  },
 ]);
 /// handler for renaming text-based formats
 export const renameTxtHandler = renameHandler("renametxt", [
   CommonFormats.TEXT.builder("text").allowTo(),
   CommonFormats.JSON.builder("json").allowFrom(),
   CommonFormats.XML.builder("xml").allowFrom(),
-  CommonFormats.YML.builder("yaml").allowFrom()
-])
+  CommonFormats.YML.builder("yaml").allowFrom(),
+]);
